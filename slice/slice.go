@@ -1,7 +1,9 @@
 package slice
 
 // Package slices defines various functions useful with slices of any type.
-import "github.com/molikatty/fp"
+import (
+	"github.com/molikatty/fp"
+)
 
 type (
 	Cap struct{}
@@ -11,6 +13,10 @@ type (
 // Of quickly create a slice.
 func Of[T any](t ...T) []T {
 	return t
+}
+
+func From[S ~[]T, T any](next fp.Next[T]) S {
+	return fp.Slice(next)
 }
 
 // Iter make an 'iter' for slice
