@@ -16,6 +16,10 @@ func Make[K comparable, V any](buflen int) map[K]V {
 	return make(map[K]V, buflen)
 }
 
+func From[M ~map[K]V, K comparable, V any](next fp.Next[fp.Pairs[K, V]]) M {
+	return fp.KV(next)
+}
+
 // Iter make an iterator for map
 func Iter[M ~map[K]V, K comparable, V any](m M) fp.Next[fp.Pairs[K, V]] {
 	var yied = make(chan fp.Pairs[K, V])
