@@ -51,7 +51,7 @@ func Caps[S ~[]T, T any](slices ...S) []int {
 	return caps
 }
 
-// Lens store the cap of multiple slices into a int-slice.
+// Lens store the len of multiple slices into a int-slice.
 func Lens[S ~[]T, T any](slices ...S) []int {
 	var caps = make([]int, len(slices))
 	for i := range slices {
