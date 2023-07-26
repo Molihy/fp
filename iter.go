@@ -48,6 +48,7 @@ func Reduce[T any](next Next[T], fn func(T, T) T) T {
 }
 
 // Map the values inside the iterator to new values
+// this function is lazy.
 func Map[R, T any](next Next[T], fn func(T) R) Next[R] {
 	return func() (R, bool) {
 		t, ok := next()
@@ -60,6 +61,7 @@ func Map[R, T any](next Next[T], fn func(T) R) Next[R] {
 }
 
 // Zip the values at the beginning of multiple iterators.
+// this function is lazy.
 func Zip[T any](nexts ...Next[T]) Next[[]T] {
 	return func() ([]T, bool) {
 		var slice = make([]T, 0)
@@ -76,6 +78,7 @@ func Zip[T any](nexts ...Next[T]) Next[[]T] {
 }
 
 // Lock the iterator to make it concurrent-safe.
+// this function is lazy.
 func Lock[T any](next Next[T]) Next[T] {
 	var lock sync.Mutex
 	return func() (T, bool) {
@@ -87,6 +90,7 @@ func Lock[T any](next Next[T]) Next[T] {
 }
 
 // Take iterate the iterator only for a specific number of times
+// this function is lazy.
 func Take[T any](stop int, next Next[T]) Next[T] {
 	var n int
 	return func() (T, bool) {
@@ -110,6 +114,7 @@ func ForEach[T any](next Next[T], fn func(T) bool) {
 }
 
 // Stop add a stopping condition to the iterator, often used to stop infinite iterators.
+// this function is lazy.
 func Stop[T any](next Next[T], fn func(T) bool) Next[T] {
 	return func() (T, bool) {
 		t, _ := next()
@@ -122,9 +127,10 @@ func Stop[T any](next Next[T], fn func(T) bool) Next[T] {
 }
 
 // From make the iterator compatible with the 'range'.
+// When the iterator is empty, the channel will be closed.
 //
 //	for v := range From(Iter){
-//	  //do something
+//	  // do something
 //	}
 func From[T any](next Next[T]) <-chan T {
 	var y = make(chan T)
