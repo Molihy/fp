@@ -33,10 +33,12 @@ func NotNil[T any](t T) bool {
 	return Not(IsNil(t))
 }
 
+// IsNaN checks 't' is NaN
 func IsNaN[T Size](t T) bool {
 	return t != t
 }
 
+// IsNaN checks 't' is not NaN
 func NotNaN[T Size](t T) bool {
 	return Not(IsNaN(t))
 }
