@@ -33,6 +33,14 @@ func NotNil[T any](t T) bool {
 	return Not(IsNil(t))
 }
 
+func IsNaN[T Size](t T) bool {
+	return t != t
+}
+
+func NotNaN[T Size](t T) bool {
+	return Not(IsNaN(t))
+}
+
 // IsZero checks if the value 't' is default zero value.
 func IsZero[T comparable](t T) bool {
 	return t == Zero[T]()
