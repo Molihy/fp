@@ -179,8 +179,8 @@ func Range[N Integer](r ...N) Next[N] {
 }
 
 // Slice generate a slice from an iterator.
-func Slice[S ~[]T, T any](i Next[T]) S {
-	var slice = make(S, 0)
+func Slice[T any](i Next[T]) []T {
+	var slice = make([]T, 0)
 	ForEach(i, func(t T) bool {
 		slice = append(slice, t)
 		return true
@@ -204,8 +204,8 @@ func Chan[T any](iter Next[T], bufcap int) chan T {
 }
 
 // KV generate a map from iterator
-func KV[M ~map[K]V, K comparable, V any](i Next[Pairs[K, V]]) M {
-	var m = make(M)
+func KV[K comparable, V any](i Next[Pairs[K, V]]) map[K]V {
+	var m = make(map[K]V)
 	ForEach(i, func(p Pairs[K, V]) bool {
 		m[p.Key()] = p.Value()
 		return true
