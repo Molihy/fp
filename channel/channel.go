@@ -40,6 +40,10 @@ func Iter[C ~chan T, T any](c C) fp.Next[T] {
 	}
 }
 
+func From[C ~chan T, T any](next fp.Next[T]) C {
+	return fp.Chan(next, 0)
+}
+
 // Merge multiple channels into one channel
 func Merge[C ~chan T, T any](ups ...C) C {
 	var lazy = func(s C) {
