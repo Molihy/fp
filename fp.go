@@ -160,7 +160,7 @@ func Min[T Size](n ...T) T {
 
 	var min T
 	for i := range n {
-		min = If(n[i] < min, Lazy(n[i]), Lazy(min))
+		min = If(n[i] < min || IsNaN(n[i]), Lazy(n[i]), Lazy(min))
 	}
 
 	return min
@@ -170,7 +170,7 @@ func Min[T Size](n ...T) T {
 func MinFrom[T Size](n Next[T]) T {
 	var min T
 	for m := range From(n) {
-		min = If(m < min, Lazy(m), Lazy(min))
+		min = If(m < min || IsNaN(m), Lazy(m), Lazy(min))
 	}
 
 	return min
@@ -184,7 +184,7 @@ func Max[T Size](n ...T) T {
 
 	var max T
 	for i := range n {
-		max = If(n[i] > max, Lazy(n[i]), Lazy(max))
+		max = If(n[i] > max || IsNaN(n[i]), Lazy(n[i]), Lazy(max))
 	}
 
 	return max
@@ -194,7 +194,7 @@ func Max[T Size](n ...T) T {
 func MaxFrom[T Size](n Next[T]) T {
 	var max T
 	for m := range From(n) {
-		max = If(m > max, Lazy(m), Lazy(max))
+		max = If(m > max || IsNaN(m), Lazy(m), Lazy(max))
 	}
 
 	return max
