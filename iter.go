@@ -155,26 +155,26 @@ func Yield[T any](next Next[T]) (yield func() T) {
 
 // Range generate a range of integers, similar to Python built-in 'range' function.
 func Range[N Integer](r ...N) Next[N] {
+	var iter = func(start, stop, step N) Next[N] {
+		return func() (N, bool) {
+			start += step
+			if start >= stop {
+				return Zero[N](), false
+			}
+
+			return start, true
+		}
+	}
+
 	switch len(r) {
 	case 0:
 		panic(ErrLeastOne)
 	case 1:
-		return rangeN(Zero[N]()-1, r[0], 1)
+		return iter(Zero[N]()-1, r[0], 1)
 	case 2:
-		return rangeN(r[0]-1, r[1], 1)
+		return iter(r[0]-1, r[1], 1)
 	default:
-		return rangeN(r[0]-r[2], r[1], r[2])
-	}
-}
-
-func rangeN[N Integer](start, stop, step N) Next[N] {
-	return func() (N, bool) {
-		start += step
-		if start >= stop {
-			return Zero[N](), false
-		}
-
-		return start, true
+		return iter(r[0]-r[2], r[1], r[2])
 	}
 }
 
@@ -212,4 +212,26 @@ func KV[M ~map[K]V, K comparable, V any](i Next[Pairs[K, V]]) M {
 	})
 
 	return m
+}
+
+// Iota infinite iterator for numbers, lazily generates an infinite sequence of numbers
+//
+//	Iota() -> 0 ... N
+//	Iota(10) -> 10 ... N
+//	Iota(5, 3) -> 5 -> 8 -> 11 -> ... N
+func Iota[N Number](n ...N) Next[N] {
+	var iter = func(start, step N) Next[N] {
+		return func() (N, bool) {
+			return start + step, true
+		}
+	}
+
+	switch len(n) {
+	case 0:
+		return iter(Zero[N]()-1, 1)
+	case 1:
+		return iter(n[0]-1, 1)
+	default:
+		return iter(n[0]-n[1], n[1])
+	}
 }
