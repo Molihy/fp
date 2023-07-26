@@ -29,7 +29,7 @@ func Of[T any](t ...T) chan T {
 	return Lazy(make(chan T, len(t)), lazy)
 }
 
-// Iter create an iterator for a channel
+// Iter make an iterator for channel
 func Iter[C ~chan T, T any](c C) fp.Next[T] {
 	return func() (T, bool) {
 		for t := range c {
