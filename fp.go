@@ -1,6 +1,7 @@
 package fp
 
 import (
+	"context"
 	"reflect"
 	"sync"
 )
@@ -243,6 +244,21 @@ func Async() Pairs[Run, Wait] {
 	}
 
 	return Pair(run, rw.Wait)
+}
+
+// Async wrapper around WaitGroup to run and wait for the completion of all goroutines
+// will pass a context to each goroutine.
+func AsyncCtx(ctx context.Context) Pairs[RunCtx, Wait] {
+	var rw sync.WaitGroup
+	var runctx = func(fn func(ctx context.Context)) {
+		rw.Add(1)
+		go func() {
+			fn(ctx)
+			rw.Done()
+		}()
+	}
+
+	return Pair(runctx, rw.Wait)
 }
 
 // DoNothing maybe useful in some cases, does nothing.

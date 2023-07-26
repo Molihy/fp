@@ -1,13 +1,17 @@
 package fp
 
-import "unsafe"
+import (
+	"context"
+	"unsafe"
+)
 
 type (
-	FAny  = func(any) any
-	FAnys = func(...any) any
-	None  = struct{}
-	Run   = func(func())
-	Wait  = func()
+	FAny   = func(any) any
+	FAnys  = func(...any) any
+	None   = struct{}
+	Run    = func(func())
+	RunCtx = func(func(context.Context))
+	Wait   = func()
 
 	// Generic collection of signed numbers
 	Signed interface {
