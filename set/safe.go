@@ -109,7 +109,7 @@ func (s *_safe[K]) ForEach(fn func(K) bool) {
 }
 
 func (s *_safe[K]) String() string {
-	var strs = fp.Slice[[]string](fp.Map[string](Iter[K](s), func(k K) string {
+	var strs = fp.Slice(fp.Map[string](Iter[K](s), func(k K) string {
 		return fmt.Sprint(k)
 	}))
 
