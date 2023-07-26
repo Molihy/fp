@@ -1,5 +1,7 @@
 package fp
 
+import "fmt"
+
 // Pairs type is the Golang implementation of a pair
 type Pairs[K, V any] struct {
 	f K
@@ -34,4 +36,8 @@ func (p Pairs[K, V]) Slice() []any {
 // Expand the pairs
 func (p Pairs[K, V]) Expand() (K, V) {
 	return p.Key(), p.Value()
+}
+
+func (p Pairs[K, V]) String() string {
+	return fmt.Sprintf("(%#v, %#v)", p.f, p.s)
 }
