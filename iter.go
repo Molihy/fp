@@ -235,3 +235,14 @@ func Iota[N Number](n ...N) Next[N] {
 		return iter(n[0]-n[1], n[1])
 	}
 }
+
+// All check if there is any 'false' in the bool iterator, similar to Python
+// built-in function 'all'.
+func All(iter Next[bool]) (ok bool) {
+	ForEach(iter, func(b bool) bool {
+		ok = b
+		return b
+	})
+
+	return
+}
