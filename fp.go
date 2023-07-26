@@ -220,6 +220,14 @@ func SumFrom[N Number](n Next[N]) N {
 	return sum
 }
 
+// Swap two value
+//
+//	var n, m = 1, 2
+//	n, m = Swap(n, m) // n, m = 2, 1
+func Swap[T any](f, s T) (T, T) {
+	return s, f
+}
+
 // Lazy return a function that wraps around 't'
 func Lazy[T any](t T) func() T {
 	return func() T {
