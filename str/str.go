@@ -35,7 +35,7 @@ func Cat(s ...string) string {
 		newstr = append(newstr, s[i]...)
 	}
 
-	return String[[]byte, byte](newstr)
+	return String(newstr)
 }
 
 func Clone(s string) string {
@@ -53,7 +53,7 @@ func Join(sep string, s ...string) string {
 			ns = append(append(ns, sep...), v...)
 		}
 
-		return String[[]byte, byte](ns)
+		return String(ns)
 	}
 
 	return fp.If(fp.IsZero(n), fp.Zero[string], str)
@@ -98,7 +98,7 @@ func Hash[N uint32 | uint64](s string) N {
 func Md5(s string) string {
 	var data = md5.New()
 	data.Write(To[byte](s))
-	return String[[]byte, byte](data.Sum(nil))
+	return String(data.Sum(nil))
 }
 
 // Lens store the len of multiple string into a int-slice.
@@ -130,7 +130,7 @@ func Reverse(s string) string {
 		rn[f], rn[t] = fp.Swap(rn[f], rn[t])
 	}
 
-	return String[[]rune, rune](rn)
+	return String(rn)
 }
 
 // Hide a substring in a main string using the given replacement string.
@@ -178,18 +178,11 @@ func To[C Char](s string) []C {
 // String conver a fp.Bytes to string
 //
 // Warning: unsafe conver don't modify original type data
-func String[S fp.Next[C] | ~[]C, C Char](r S) string {
-	return fp.If(fp.Is[fp.Next[C]](fp.Zero[S]()),
-		func() string {
-			return strHelp(fp.To[fp.Next[C]](r))
-		},
-		func() string {
-			return fp.To[string](r)
-		},
-	)
+func String[C Char](r []C) string {
+	return fp.To[string](r)
 }
 
-func strHelp[C Char](iter fp.Next[C]) string {
+func From[C Char](iter fp.Next[C]) string {
 	var s = make([]C, 0)
 	fp.ForEach(iter, func(b C) bool {
 		s = append(s, b)
