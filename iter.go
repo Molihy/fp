@@ -262,6 +262,17 @@ func All(next Next[bool]) (ok bool) {
 	return
 }
 
+// Single check if there is any 'true' in the bool iterator, similar to Python
+// built-in function 'any'.
+func Single(next Next[bool]) (ok bool) {
+	ForEach(next, func(b bool) bool {
+		ok = b
+		return Not(b)
+	})
+
+	return
+}
+
 // Merge multiple iterators, will iterate in order from left to right
 func Merge[E any](nexts ...Next[E]) Next[E] {
 	var index, length = 0, len(nexts)
