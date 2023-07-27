@@ -222,7 +222,8 @@ func KV[K comparable, V any](i Next[Pairs[K, V]]) map[K]V {
 func Iota[N Number](n ...N) Next[N] {
 	var iter = func(start, step N) Next[N] {
 		return func() (N, bool) {
-			return start + step, true
+			start += step
+			return start, true
 		}
 	}
 
