@@ -47,6 +47,7 @@ func Reduce[E any](next Next[E], fn func(E, E) E) E {
 	}
 }
 
+// Fold from left to right, 1, 2, 3, 4 will be computed as 1, (1+2), ((1+2)+3), (((1+2)+3)+4)
 func Fold[E any](next Next[E], fn func(E, E) E) Next[E] {
 	var poly E
 	return func() (E, bool) {
@@ -261,16 +262,17 @@ func All(next Next[bool]) (ok bool) {
 	return
 }
 
+// Merge multiple iterators, will iterate in order from left to right
 func Merge[E any](nexts ...Next[E]) Next[E] {
 	var index, length = 0, len(nexts)
 	var next Next[E]
 	next = func() (E, bool) {
+		if index == length {
+			return Zero[E](), false
+		}
+
 		e, ok := nexts[index]()
 		if Not(ok) {
-			if index == length {
-				return Zero[E](), false
-			}
-
 			index++
 			return next()
 		}
