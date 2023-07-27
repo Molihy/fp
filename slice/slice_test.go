@@ -36,6 +36,13 @@ func TestExample(t *testing.T) {
 		}))
 	})
 
+	t.Run("Fold", func(t *testing.T) {
+		var ints = Iter(Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+		t.Log(fp.Slice(fp.Fold(ints, func(n, m int) int {
+			return n + m
+		})))
+	})
+
 	t.Run("All", func(t *testing.T) {
 		var ints = Iter(Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
 		t.Log(fp.All(fp.Map(ints, func(n int) bool {
