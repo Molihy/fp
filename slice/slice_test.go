@@ -49,4 +49,11 @@ func TestExample(t *testing.T) {
 			return n > 0
 		})))
 	})
+
+	t.Run("Merge", func(t *testing.T) {
+		var i1 = Iter(Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11))
+		var i2 = Iter(Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12))
+		var i3 = Iter(Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13))
+		t.Log(fp.Slice(fp.Merge(i1, i2, i3)))
+	})
 }
