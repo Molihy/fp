@@ -9,21 +9,21 @@ import (
 )
 
 // Next iterator type with some processing functions implemented for it.
-type Next[T any] func() (T, bool)
+type Next[E any] func() (E, bool)
 
-func (next Next[T]) String() string {
+func (next Next[E]) String() string {
 	var s = strings.Split(runtime.FuncForPC(reflect.ValueOf(next).Pointer()).Name(), "/")
 	return fmt.Sprintf("<%v %p>", s[len(s)-1], next)
 }
 
 // Filter the iterator, keeping only the values that evaluate to 'true'.
 // this function is lazy.
-func Filter[T any](next Next[T], fn func(T) bool) Next[T] {
-	return func() (T, bool) {
+func Filter[E any](next Next[E], fn func(E) bool) Next[E] {
+	return func() (E, bool) {
 		for {
 			t, ok := next()
 			if Not(ok) {
-				return Zero[T](), false
+				return Zero[E](), false
 			}
 
 			if fn(t) {
@@ -35,8 +35,8 @@ func Filter[T any](next Next[T], fn func(T) bool) Next[T] {
 
 // Reduce from left to right, 1, 2, 3, 4 will be computed as (((1+2)+3)+4),
 // resulting in a single value. the function is not lazy
-func Reduce[T any](next Next[T], fn func(T, T) T) T {
-	var poly T
+func Reduce[E any](next Next[E], fn func(E, E) E) E {
+	var poly E
 	for {
 		t, ok := next()
 		if Not(ok) {
@@ -47,13 +47,26 @@ func Reduce[T any](next Next[T], fn func(T, T) T) T {
 	}
 }
 
+func Fold[E any](next Next[E], fn func(E, E) E) Next[E] {
+	var poly E
+	return func() (E, bool) {
+		e, ok := next()
+		if Not(ok) {
+			return Zero[E](), false
+		}
+
+		poly = fn(poly, e)
+		return poly, true
+	}
+}
+
 // Map the values inside the iterator to new values
 // this function is lazy.
-func Map[R, T any](next Next[T], fn func(T) R) Next[R] {
-	return func() (R, bool) {
+func Map[ER, E any](next Next[E], fn func(E) ER) Next[ER] {
+	return func() (ER, bool) {
 		t, ok := next()
 		if Not(ok) {
-			return Zero[R](), false
+			return Zero[ER](), false
 		}
 
 		return fn(t), true
@@ -62,13 +75,13 @@ func Map[R, T any](next Next[T], fn func(T) R) Next[R] {
 
 // Zip the values at the beginning of multiple iterators.
 // this function is lazy.
-func Zip[T any](nexts ...Next[T]) Next[[]T] {
-	return func() ([]T, bool) {
-		var slice = make([]T, 0)
+func Zip[E any](nexts ...Next[E]) Next[[]E] {
+	return func() ([]E, bool) {
+		var slice = make([]E, 0)
 		for i := range nexts {
 			t, ok := nexts[i]()
 			if Not(ok) {
-				return Zero[[]T](), false
+				return Zero[[]E](), false
 			}
 			slice = append(slice, t)
 		}
@@ -79,9 +92,9 @@ func Zip[T any](nexts ...Next[T]) Next[[]T] {
 
 // Lock the iterator to make it concurrent-safe.
 // this function is lazy.
-func Lock[T any](next Next[T]) Next[T] {
+func Lock[E any](next Next[E]) Next[E] {
 	var lock sync.Mutex
-	return func() (T, bool) {
+	return func() (E, bool) {
 		lock.Lock()
 		defer lock.Unlock()
 
@@ -91,12 +104,12 @@ func Lock[T any](next Next[T]) Next[T] {
 
 // Take iterate the iterator only for a specific number of times
 // this function is lazy.
-func Take[T any](stop int, next Next[T]) Next[T] {
+func Take[E any](stop int, next Next[E]) Next[E] {
 	var n int
-	return func() (T, bool) {
+	return func() (E, bool) {
 		n++
 		if n > stop {
-			return Zero[T](), false
+			return Zero[E](), false
 		}
 
 		return next()
@@ -105,7 +118,7 @@ func Take[T any](stop int, next Next[T]) Next[T] {
 
 // ForEach loop through an iterator to retrieve values, and you can stop the loop prematurely by
 // returning false from the 'fn'.
-func ForEach[T any](next Next[T], fn func(T) bool) {
+func ForEach[E any](next Next[E], fn func(E) bool) {
 	for n, ok := next(); ok; n, ok = next() {
 		if Not(fn(n)) {
 			return
@@ -115,11 +128,11 @@ func ForEach[T any](next Next[T], fn func(T) bool) {
 
 // Stop add a stopping condition to the iterator, often used to stop infinite iterators.
 // this function is lazy.
-func Stop[T any](next Next[T], fn func(T) bool) Next[T] {
-	return func() (T, bool) {
+func Stop[E any](next Next[E], fn func(E) bool) Next[E] {
+	return func() (E, bool) {
 		t, _ := next()
 		if fn(t) {
-			return Zero[T](), false
+			return Zero[E](), false
 		}
 
 		return t, true
@@ -132,8 +145,8 @@ func Stop[T any](next Next[T], fn func(T) bool) Next[T] {
 //	for v := range From(Iter){
 //	  // do something
 //	}
-func From[T any](next Next[T]) <-chan T {
-	var y = make(chan T)
+func From[E any](next Next[E]) <-chan E {
+	var y = make(chan E)
 	go func() {
 		for n, ok := next(); ok; n, ok = next() {
 			y <- n
@@ -146,9 +159,9 @@ func From[T any](next Next[T]) <-chan T {
 }
 
 // Yield iteration in Go
-func Yield[T any](next Next[T]) (yield func() T) {
+func Yield[E any](next Next[E]) (yield func() E) {
 	var y = From(next)
-	return func() T {
+	return func() E {
 		return <-y
 	}
 }
@@ -179,10 +192,10 @@ func Range[N Integer](r ...N) Next[N] {
 }
 
 // Slice generate a slice from an iterator.
-func Slice[T any](i Next[T]) []T {
-	var slice = make([]T, 0)
-	ForEach(i, func(t T) bool {
-		slice = append(slice, t)
+func Slice[E any](next Next[E]) []E {
+	var slice = make([]E, 0)
+	ForEach(next, func(e E) bool {
+		slice = append(slice, e)
 		return true
 	})
 
@@ -190,10 +203,10 @@ func Slice[T any](i Next[T]) []T {
 }
 
 // Chan generate a channel with a custom bufcap from an iterator.
-func Chan[T any](iter Next[T], bufcap int) chan T {
-	var channel = make(chan T, bufcap)
+func Chan[E any](next Next[E], bufcap int) chan E {
+	var channel = make(chan E, bufcap)
 	go func() {
-		ForEach(iter, func(t T) bool {
+		ForEach(next, func(t E) bool {
 			channel <- t
 			return true
 		})
@@ -204,9 +217,9 @@ func Chan[T any](iter Next[T], bufcap int) chan T {
 }
 
 // KV generate a map from iterator
-func KV[K comparable, V any](i Next[Pairs[K, V]]) map[K]V {
+func KV[K comparable, V any](next Next[Pairs[K, V]]) map[K]V {
 	var m = make(map[K]V)
-	ForEach(i, func(p Pairs[K, V]) bool {
+	ForEach(next, func(p Pairs[K, V]) bool {
 		m[p.Key()] = p.Value()
 		return true
 	})
@@ -239,8 +252,8 @@ func Iota[N Number](n ...N) Next[N] {
 
 // All check if there is any 'false' in the bool iterator, similar to Python
 // built-in function 'all'.
-func All(iter Next[bool]) (ok bool) {
-	ForEach(iter, func(b bool) bool {
+func All(next Next[bool]) (ok bool) {
+	ForEach(next, func(b bool) bool {
 		ok = b
 		return b
 	})
