@@ -260,3 +260,23 @@ func All(next Next[bool]) (ok bool) {
 
 	return
 }
+
+func Merge[E any](nexts ...Next[E]) Next[E] {
+	var index, length = 0, len(nexts)
+	var next Next[E]
+	next = func() (E, bool) {
+		e, ok := nexts[index]()
+		if Not(ok) {
+			if index == length {
+				return Zero[E](), false
+			}
+
+			index++
+			return next()
+		}
+
+		return e, true
+	}
+
+	return next
+}
