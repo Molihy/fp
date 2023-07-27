@@ -44,10 +44,13 @@ func TestExample(t *testing.T) {
 	})
 
 	t.Run("All", func(t *testing.T) {
-		var ints = Iter(Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
-		t.Log(fp.All(fp.Map(ints, func(n int) bool {
-			return n > 0
-		})))
+		var ints = Iter(Of(true, true, true, true, true, true, true, true, true))
+		t.Log(fp.All(ints))
+	})
+
+	t.Run("Single", func(t *testing.T) {
+		var ints = Iter(Of(false, false, false, false, true, false, false, false))
+		t.Log(fp.Single(ints))
 	})
 
 	t.Run("Merge", func(t *testing.T) {
