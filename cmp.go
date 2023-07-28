@@ -75,22 +75,6 @@ func Has[T comparable, R any](m map[T]R, t T) bool {
 	return ok
 }
 
-// Or if function f returns true, then function b is not executed,
-// which is an implementation of the '||' operator in a function form
-func Or(f, s func() bool) func() bool {
-	return func() bool {
-		return f() || s()
-	}
-}
-
-// And if function f returns true, then function b is executed,
-// which is an implementation of the '&&' operator in a function form.
-func And(a, b func() bool) func() bool {
-	return func() bool {
-		return a() && b()
-	}
-}
-
 // Xor performs the XOR operation on two bool values.
 func Xor(a, b bool) bool {
 	return To[bool](To[uint8](a) ^ To[uint8](b))
