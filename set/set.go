@@ -29,6 +29,7 @@ type Set[K comparable] interface {
 	Len() int
 	// Clone the set
 	Clone() Set[K]
+	Loop(func(K))
 	// Union returns a new set with all elements in both sets.
 	Union(Set[K]) Set[K]
 	// Slice get value for set

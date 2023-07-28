@@ -25,10 +25,7 @@ func (s _unsafe[K]) Add(t K) {
 }
 
 func (s _unsafe[K]) Adds(other Set[K]) {
-	other.ForEach(func(k K) bool {
-		s.Add(k)
-		return true
-	})
+	other.Loop(func(k K) { s.Add(k) })
 }
 
 func (s _unsafe[K]) Del(t K) {
@@ -64,14 +61,11 @@ func (s _unsafe[K]) IsEmpty() bool {
 }
 
 func (s _unsafe[K]) Has(t K) bool {
-	return fp.Has(s, t)
+	return fp.InMap(s, t)
 }
 
 func (s _unsafe[K]) Clear() {
-	s.ForEach(func(k K) bool {
-		s.Del(k)
-		return true
-	})
+	s.Loop(func(k K) { s.Del(k) })
 }
 
 func (s _unsafe[K]) ForEach(fn func(K) bool) {
@@ -79,6 +73,12 @@ func (s _unsafe[K]) ForEach(fn func(K) bool) {
 		if !fn(k) {
 			return
 		}
+	}
+}
+
+func (s _unsafe[K]) Loop(fn func(K)) {
+	for k := range s {
+		fn(k)
 	}
 }
 
@@ -100,10 +100,7 @@ func (s _unsafe[K]) String() string {
 
 func (s _unsafe[K]) Slice() []K {
 	var slice = make([]K, 0, s.Len())
-	s.ForEach(func(k K) bool {
-		slice = append(slice, k)
-		return true
-	})
+	s.Loop(func(k K) { slice = append(slice, k) })
 
 	return slice
 }
@@ -123,12 +120,10 @@ func (s _unsafe[K]) Equal(other Set[K]) bool {
 
 func (s _unsafe[K]) Difference(other Set[K]) Set[K] {
 	var newSet = unsafeOf[K]()
-	s.ForEach(func(k K) bool {
+	s.Loop(func(k K) {
 		if !other.Has(k) {
 			newSet.Add(k)
 		}
-
-		return true
 	})
 
 	return newSet
@@ -138,19 +133,17 @@ func (s _unsafe[K]) Intersect(other Set[K]) Set[K] {
 	var newSet = unsafeOf[K]()
 	var t = fp.If(s.Len() < other.Len(),
 		func() fp.Pairs[Set[K], Set[K]] {
-			return fp.Pair(fp.To[Set[K]](s), other)
+			return fp.Pair(fp.AnyTo[Set[K]](s), other)
 		},
 		func() fp.Pairs[Set[K], Set[K]] {
-			return fp.Pair(other, fp.To[Set[K]](s))
+			return fp.Pair(other, fp.AnyTo[Set[K]](s))
 		},
 	)
 
-	t.Key().ForEach(func(k K) bool {
+	t.Key().Loop(func(k K) {
 		if t.Value().Has(k) {
 			newSet.Add(k)
 		}
-
-		return true
 	})
 
 	return newSet

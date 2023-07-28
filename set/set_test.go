@@ -31,7 +31,7 @@ func TestExample(t *testing.T) {
 		var d = Of[Unsafe](1, 2)
 		var e = Of[Unsafe](1, 2, 3)
 
-		t.Log(d.Difference(e))
+		t.Log(e.Difference(d))
 	})
 
 	t.Run("Intersect", func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestExample(t *testing.T) {
 	})
 
 	t.Run("IsSubset", func(t *testing.T) {
-		var d = Of[Unsafe](1, 4)
+		var d = Of[Unsafe](1, 2)
 		var e = Of[Unsafe](1, 2, 3)
 
 		t.Log(d.IsSubset(e))

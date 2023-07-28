@@ -32,9 +32,8 @@ func (s *_safe[K]) Add(t K) {
 }
 
 func (s *_safe[K]) Adds(other Set[K]) {
-	other.ForEach(func(k K) bool {
+	other.Loop(func(k K) {
 		s.Add(k)
-		return true
 	})
 
 }
@@ -80,24 +79,15 @@ func (s *_safe[K]) Has(t K) bool {
 }
 
 func (s *_safe[K]) Clear() {
-	s.ForEach(func(k K) bool {
-		s.Del(k)
-		return true
-	})
+	s.Loop(func(k K) { s.Del(k) })
 }
 
 func (s *_safe[K]) Union(other Set[K]) Set[K] {
 	var newSet = safeOf[K]()
 
-	s.ForEach(func(k K) bool {
-		newSet.Add(k)
-		return true
-	})
+	s.Loop(func(k K) { newSet.Add(k) })
 
-	other.ForEach(func(k K) bool {
-		newSet.Add(k)
-		return true
-	})
+	other.Loop(func(k K) { newSet.Add(k) })
 
 	return newSet
 }
@@ -105,6 +95,13 @@ func (s *_safe[K]) Union(other Set[K]) Set[K] {
 func (s *_safe[K]) ForEach(fn func(K) bool) {
 	s.set.Range(func(k, _ any) bool {
 		return fn(fp.AnyTo[K](k))
+	})
+}
+
+func (s *_safe[K]) Loop(fn func(K)) {
+	s.set.Range(func(k, _ any) bool {
+		fn(fp.AnyTo[K](k))
+		return true
 	})
 }
 
@@ -118,10 +115,7 @@ func (s *_safe[K]) String() string {
 
 func (s *_safe[K]) Slice() []K {
 	var slice = make([]K, 0, s.Len())
-	s.ForEach(func(k K) bool {
-		slice = append(slice, k)
-		return true
-	})
+	s.Loop(func(k K) { slice = append(slice, k) })
 
 	return slice
 }
@@ -141,12 +135,10 @@ func (s *_safe[K]) Equal(other Set[K]) bool {
 
 func (s *_safe[K]) Difference(other Set[K]) Set[K] {
 	var newSet = safeOf[K]()
-	s.ForEach(func(k K) bool {
+	s.Loop(func(k K) {
 		if !other.Has(k) {
 			newSet.Add(k)
 		}
-
-		return true
 	})
 
 	return newSet
@@ -156,19 +148,17 @@ func (s *_safe[K]) Intersect(other Set[K]) Set[K] {
 	var newSet = safeOf[K]()
 	var t = fp.If(s.Len() < other.Len(),
 		func() fp.Pairs[Set[K], Set[K]] {
-			return fp.Pair(fp.To[Set[K]](s), other)
+			return fp.Pair(fp.AnyTo[Set[K]](s), other)
 		},
 		func() fp.Pairs[Set[K], Set[K]] {
-			return fp.Pair(other, fp.To[Set[K]](s))
+			return fp.Pair(other, fp.AnyTo[Set[K]](s))
 		},
 	)
 
-	t.Key().ForEach(func(k K) bool {
+	t.Key().Loop(func(k K) {
 		if t.Value().Has(k) {
 			newSet.Add(k)
 		}
-
-		return true
 	})
 
 	return newSet
