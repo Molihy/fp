@@ -62,7 +62,7 @@ func Memoize[T comparable, R any](fn func(T) R) func(T) R {
 			return memoize[t]
 		}
 
-		return If(Has(memoize, t), has, nohash)
+		return If(InMap(memoize, t), has, nohash)
 	}
 }
 
@@ -83,7 +83,7 @@ func MemoizeFunc[T comparable, A, R any](fn func(A) R, fc func(A) T) func(A) R {
 			return memoize[key]
 		}
 
-		return If(Has(memoize, key), has, nohash)
+		return If(InMap(memoize, key), has, nohash)
 	}
 }
 
