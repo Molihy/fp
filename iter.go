@@ -287,6 +287,7 @@ func Merge[E any](nexts ...Next[E]) Next[E] {
 	return next
 }
 
+// Loop like ForEach, but cannot be actively interrupted
 func Loop[E any](next Next[E], fn func(E)) {
 	for e, ok := next(); ok; e, ok = next() {
 		fn(e)
