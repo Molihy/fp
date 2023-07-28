@@ -69,9 +69,9 @@ func Is[T any](t any) bool {
 	return ok
 }
 
-// Has check if a value exists in a map
-func Has[T comparable, R any](m map[T]R, t T) bool {
-	_, ok := m[t]
+// InMap check if a value exists in a map
+func InMap[K comparable, V any](m map[K]V, k K) bool {
+	_, ok := m[k]
 	return ok
 }
 

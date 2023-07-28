@@ -195,10 +195,7 @@ func Range[N Integer](r ...N) Next[N] {
 // Slice generate a slice from an iterator.
 func Slice[E any](next Next[E]) []E {
 	var slice = make([]E, 0)
-	ForEach(next, func(e E) bool {
-		slice = append(slice, e)
-		return true
-	})
+	Loop(next, func(e E) { slice = append(slice, e) })
 
 	return slice
 }
@@ -207,10 +204,7 @@ func Slice[E any](next Next[E]) []E {
 func Chan[E any](next Next[E], bufcap int) chan E {
 	var channel = make(chan E, bufcap)
 	go func() {
-		ForEach(next, func(t E) bool {
-			channel <- t
-			return true
-		})
+		Loop(next, func(t E) { channel <- t })
 		close(channel)
 	}()
 
@@ -220,9 +214,8 @@ func Chan[E any](next Next[E], bufcap int) chan E {
 // KV generate a map from iterator
 func KV[K comparable, V any](next Next[Pairs[K, V]]) map[K]V {
 	var m = make(map[K]V)
-	ForEach(next, func(p Pairs[K, V]) bool {
+	Loop(next, func(p Pairs[K, V]) {
 		m[p.Key()] = p.Value()
-		return true
 	})
 
 	return m
@@ -292,4 +285,10 @@ func Merge[E any](nexts ...Next[E]) Next[E] {
 	}
 
 	return next
+}
+
+func Loop[E any](next Next[E], fn func(E)) {
+	for e, ok := next(); ok; e, ok = next() {
+		fn(e)
+	}
 }
